@@ -1,0 +1,20 @@
+- name: Setup Baseline Information for Servers
+  hosts: windows_servers
+  gather_facts: false
+
+  tasks:
+    - name: Check connectivity to hosts
+      ansible.windows.win_ping:
+
+    - name: Change the hostname to the desired hostname
+      ansible.windows.win_hostname:
+        name: "{{ name }}"
+      register: res
+
+    - name: Reboot machine if necessary
+      ansible.windows.win_reboot:
+        post_reboot_delay: 30
+      when: res.reboot_required
+
+    - name: Set the Lab IP address of server
+      ansible.windows.win_shell: New-NetIPAddress -InterfaceAlias 'Ethernet 2' -Ipaddress {{ labip }} -PrefixLength 24 -DefaultGateway 10.0.0.1
